@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Room Reservation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        input[type="number"] {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 80px;
+            text-align: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hotel-visualization {
+            padding: 30px;
+            background: #ffffff;
+        }
+
+        .building {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .floor {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stairs-lift {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 60px;
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .floor-label {
+            font-weight: bold;
+            color: #2c3e50;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .rooms-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .room {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .room.available {
+            background: #d4edda;
+            border-color: #27ae60;
+            color: #155724;
+        }
+
+        .room.occupied {
+            background: #f8d7da;
+            border-color: #e74c3c;
+            color: #721c24;
+        }
+
+        .room.selected {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+        }
+
+        .room:hover {
+            transform: scale(1.05);
+        }
+
+        .booking-info {
+            background: #e8f4fd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .booking-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            font-size: 18px;
+            color: #3498db;
+            margin-top: 5px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #ddd;
+        }
+
+        .room-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .rooms-container {
+                justify-content: center;
+            }
+            
+            .room {
+                width: 45px;
+                height: 45px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏨 Hotel Room Reservation System</h1>
+            <p>Smart booking with optimal travel time calculation</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-row">
+                <div class="input-group">
+                    <label for="roomCount">Number of Rooms:</label>
+                    <input type="number" id="roomCount" min="1" max="5" value="1">
+                </div>
+                <button class="btn-primary" onclick="bookRooms()">Book Rooms</button>
+            </div>
+            
+            <div class="control-row">
+                <button class="btn-secondary" onclick="generateRandomOccupancy()">Generate Random Occupancy</button>
+                <button class="btn-success" onclick="resetBooking()">Reset All Bookings</button>
+            </div>
+
+            <div id="status"></div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #d4edda; border-color: #27ae60;"></div>
+                <span>Available</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f8d7da; border-color: #e74c3c;"></div>
+                <span>Occupied</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #fff3cd; border-color: #ffc107;"></div>
+                <span>Selected for Booking</span>
+            </div>
+        </div>
+
+        <div class="hotel-visualization">
+            <div class="building" id="building"></div>
+        </div>
+
+        <div id="bookingInfo" class="booking-info" style="display: none;">
+            <h3>📋 Booking Details</h3>
+            <div class="booking-details" id="bookingDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        class HotelReservationSystem {
+            constructor() {
+                this.rooms = {};
+                this.occupiedRooms = new Set();
+                this.selectedRooms = [];
+                this.initializeRooms();
+                this.renderBuilding();
+            }
+
+            initializeRooms() {
+                // Initialize floors 1-9 (each with 10 rooms)
+                for (let floor = 1; floor <= 9; floor++) {
+                    for (let room = 1; room <= 10; room++) {
+                        const roomNumber = floor * 100 + room;
+                        this.rooms[roomNumber] = {
+                            floor: floor,
+                            position: room,
+                            available: true
+                        };
+                    }
+                }
+
+                // Initialize floor 10 (7 rooms)
+                for (let room = 1; room <= 7; room++) {
+                    const roomNumber = 1000 + room;
+                    this.rooms[roomNumber] = {
+                        floor: 10,
+                        position: room,
+                        available: true
+                    };
+                }
+            }
+
+            calculateTravelTime(room1, room2) {
+                const r1 = this.rooms[room1];
+                const r2 = this.rooms[room2];
+                
+                // Vertical travel time (2 minutes per floor)
+                const verticalTime = Math.abs(r1.floor - r2.floor) * 2;
+                
+                // Horizontal travel time (1 minute per room)
+                const horizontalTime = Math.abs(r1.position - r2.position);
+                
+                return verticalTime + horizontalTime;
+            }
+
+            calculateTotalTravelTime(roomList) {
+                if (roomList.length <= 1) return 0;
+                
+                // Calculate travel time from first to last room
+                const sortedRooms = [...roomList].sort((a, b) => a - b);
+                return this.calculateTravelTime(sortedRooms[0], sortedRooms[sortedRooms.length - 1]);
+            }
+
+            getAvailableRooms() {
+                return Object.keys(this.rooms)
+                    .map(Number)
+                    .filter(roomNum => !this.occupiedRooms.has(roomNum))
+                    .sort((a, b) => a - b);
+            }
+
+            getOptimalRooms(requestedCount) {
+                const availableRooms = this.getAvailableRooms();
+                
+                if (availableRooms.length < requestedCount) {
+                    return null; // Not enough rooms available
+                }
+
+                // Try to find rooms on the same floor first
+                for (let floor = 1; floor <= 10; floor++) {
+                    const floorRooms = availableRooms.filter(room => this.rooms[room].floor === floor);
+                    if (floorRooms.length >= requestedCount) {
+                        // Select consecutive rooms if possible
+                        for (let i = 0; i <= floorRooms.length - requestedCount; i++) {
+                            const candidateRooms = floorRooms.slice(i, i + requestedCount);
+                            if (this.areRoomsConsecutive(candidateRooms)) {
+                                return candidateRooms;
+                            }
+                        }
+                        // If not consecutive, select first available rooms on this floor
+                        return floorRooms.slice(0, requestedCount);
+                    }
+                }
+
+                // If no single floor has enough rooms, find optimal combination across floors
+                return this.findOptimalMultiFloorBooking(availableRooms, requestedCount);
+            }
+
+            areRoomsConsecutive(roomList) {
+                if (roomList.length <= 1) return true;
+                
+                const sortedRooms = [...roomList].sort((a, b) => a - b);
+                for (let i = 1; i < sortedRooms.length; i++) {
+                    const current = this.rooms[sortedRooms[i]];
+                    const previous = this.rooms[sortedRooms[i-1]];
+                    
+                    if (current.floor !== previous.floor || 
+                        current.position !== previous.position + 1) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            findOptimalMultiFloorBooking(availableRooms, requestedCount) {
+                let bestCombination = null;
+                let bestTravelTime = Infinity;
+
+                // Generate all combinations of requested count
+                const combinations = this.getCombinations(availableRooms, requestedCount);
+                
+                for (const combination of combinations) {
+                    const travelTime = this.calculateTotalTravelTime(combination);
+                    if (travelTime < bestTravelTime) {
+                        bestTravelTime = travelTime;
+                        bestCombination = combination;
+                    }
+                }
+
+                return bestCombination;
+            }
+
+            getCombinations(arr, count) {
+                if (count === 1) return arr.map(item => [item]);
+                if (count > arr.length) return [];
+                
+                const combinations = [];
+                
+                // For performance, limit combinations for large arrays
+                if (arr.length > 20) {
+                    // Use a greedy approach for large datasets
+                    return this.getGreedyCombinations(arr, count);
+                }
+                
+                for (let i = 0; i <= arr.length - count; i++) {
+                    const firstItem = arr[i];
+                    const remainingItems = arr.slice(i + 1);
+                    const remainingCombinations = this.getCombinations(remainingItems, count - 1);
+                    
+                    for (const combination of remainingCombinations) {
+                        combinations.push([firstItem, ...combination]);
+                    }
+                }
+                
+                return combinations;
+            }
+
+            getGreedyCombinations(arr, count) {
+                // Group rooms by floor and select optimally
+                const floorGroups = {};
+                
+                for (const room of arr) {
+                    const floor = this.rooms[room].floor;
+                    if (!floorGroups[floor]) floorGroups[floor] = [];
+                    floorGroups[floor].push(room);
+                }
+
+                // Try different combinations of floors
+                const combinations = [];
+                const floors = Object.keys(floorGroups).map(Number).sort((a, b) => a - b);
+                
+                for (let i = 0; i < floors.length && combinations.length < 100; i++) {
+                    for (let j = i; j < floors.length && combinations.length < 100; j++) {
+                        const selectedRooms = [];
+                        
+                        // Add rooms from floors between i and j
+                        for (let k = i; k <= j && selectedRooms.length < count; k++) {
+                            const floorRooms = floorGroups[floors[k]].slice(0, count - selectedRooms.length);
+                            selectedRooms.push(...floorRooms);
+                        }
+                        
+                        if (selectedRooms.length === count) {
+                            combinations.push(selectedRooms);
+                        }
+                    }
+                }
+                
+                return combinations;
+            }
+
+            bookRooms(requestedCount) {
+                this.clearSelection();
+                
+                const optimalRooms = this.getOptimalRooms(requestedCount);
+                
+                if (!optimalRooms) {
+                    return {
+                        success: false,
+                        message: `Not enough rooms available. Only ${this.getAvailableRooms().length} rooms left.`
+                    };
+                }
+
+                // Mark rooms as occupied
+                for (const roomNum of optimalRooms) {
+                    this.occupiedRooms.add(roomNum);
+                }
+
+                this.selectedRooms = [...optimalRooms];
+                
+                const travelTime = this.calculateTotalTravelTime(optimalRooms);
+                const floorDistribution = this.getFloorDistribution(optimalRooms);
+                
+                return {
+                    success: true,
+                    rooms: optimalRooms,
+                    travelTime: travelTime,
+                    floorDistribution: floorDistribution,
+                    message: `Successfully booked ${requestedCount} room(s): ${optimalRooms.join(', ')}`
+                };
+            }
+
+            getFloorDistribution(roomList) {
+                const distribution = {};
+                for (const room of roomList) {
+                    const floor = this.rooms[room].floor;
+                    if (!distribution[floor]) distribution[floor] = [];
+                    distribution[floor].push(room);
+                }
+                return distribution;
+            }
+
+            generateRandomOccupancy() {
+                this.clearSelection();
+                this.occupiedRooms.clear();
+                
+                const allRooms = Object.keys(this.rooms).map(Number);
+                const occupancyRate = 0.3 + Math.random() * 0.4; // 30-70% occupancy
+                const roomsToOccupy = Math.floor(allRooms.length * occupancyRate);
+                
+                // Randomly select rooms to occupy
+                const shuffledRooms = [...allRooms].sort(() => Math.random() - 0.5);
+                for (let i = 0; i < roomsToOccupy; i++) {
+                    this.occupiedRooms.add(shuffledRooms[i]);
+                }
+                
+                return {
+                    totalRooms: allRooms.length,
+                    occupiedRooms: roomsToOccupy,
+                    availableRooms: allRooms.length - roomsToOccupy,
+                    occupancyRate: Math.round(occupancyRate * 100)
+                };
+            }
+
+            resetBooking() {
+                this.occupiedRooms.clear();
+                this.clearSelection();
+            }
+
+            clearSelection() {
+                this.selectedRooms = [];
+            }
+
+            renderBuilding() {
+                const building = document.getElementById('building');
+                building.innerHTML = '';
+
+                for (let floor = 10; floor >= 1; floor--) {
+                    const floorDiv = document.createElement('div');
+                    floorDiv.className = 'floor';
+
+                    // Stairs/Lift
+                    const stairsDiv = document.createElement('div');
+                    stairsDiv.className = 'stairs-lift';
+                    stairsDiv.innerHTML = '🚶<br>🛗';
+                    floorDiv.appendChild(stairsDiv);
+
+                    // Floor label
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = 'floor-label';
+                    labelDiv.textContent = `Floor ${floor}`;
+                    floorDiv.appendChild(labelDiv);
+
+                    // Rooms container
+                    const roomsContainer = document.createElement('div');
+                    roomsContainer.className = 'rooms-container';
+
+                    const roomsOnFloor = Object.keys(this.rooms)
+                        .map(Number)
+                        .filter(roomNum => this.rooms[roomNum].floor === floor)
+                        .sort((a, b) => a - b);
+
+                    for (const roomNum of roomsOnFloor) {
+                        const roomDiv = document.createElement('div');
+                        roomDiv.className = 'room';
+                        roomDiv.textContent = roomNum;
+                        roomDiv.dataset.room = roomNum;
+
+                        // Set room status
+                        if (this.selectedRooms.includes(roomNum)) {
+                            roomDiv.classList.add('selected');
+                        } else if (this.occupiedRooms.has(roomNum)) {
+                            roomDiv.classList.add('occupied');
+                        } else {
+                            roomDiv.classList.add('available');
+                        }
+
+                        roomsContainer.appendChild(roomDiv);
+                    }
+
+                    floorDiv.appendChild(roomsContainer);
+                    building.appendChild(floorDiv);
+                }
+            }
+
+            updateDisplay() {
+                this.renderBuilding();
+            }
+        }
+
+        // Initialize the system
+        const hotel = new HotelReservationSystem();
+
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${isError ? 'error' : 'success'}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showBookingInfo(bookingResult) {
+            const bookingInfo = document.getElementById('bookingInfo');
+            const bookingDetails = document.getElementById('bookingDetails');
+            
+            if (!bookingResult.success) {
+                bookingInfo.style.display = 'none';
+                return;
+            }
+
+            bookingDetails.innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">Booked Rooms</div>
+                    <div class="detail-value">${bookingResult.rooms.join(', ')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Total Travel Time</div>
+                    <div class="detail-value">${bookingResult.travelTime} minutes</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Floors Occupied</div>
+                    <div class="detail-value">${Object.keys(bookingResult.floorDistribution).join(', ')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Room Count</div>
+                    <div class="detail-value">${bookingResult.rooms.length} rooms</div>
+                </div>
+            `;
+            
+            bookingInfo.style.display = 'block';
+        }
+
+        function bookRooms() {
+            const roomCount = parseInt(document.getElementById('roomCount').value);
+            
+            if (roomCount < 1 || roomCount > 5) {
+                showStatus('Please enter a number between 1 and 5', true);
+                return;
+            }
+
+            const result = hotel.bookRooms(roomCount);
+            hotel.updateDisplay();
+            
+            showStatus(result.message, !result.success);
+            showBookingInfo(result);
+        }
+
+        function generateRandomOccupancy() {
+            const result = hotel.generateRandomOccupancy();
+            hotel.updateDisplay();
+            
+            showStatus(`Generated ${result.occupancyRate}% occupancy: ${result.occupiedRooms}/${result.totalRooms} rooms occupied`);
+            
+            // Hide booking info when generating new occupancy
+            document.getElementById('bookingInfo').style.display = 'none';
+        }
+
+        function resetBooking() {
+            hotel.resetBooking();
+            hotel.updateDisplay();
+            
+            showStatus('All bookings have been reset');
+            document.getElementById('bookingInfo').style.display = 'none';
+        }
+
+        // Initial render
+        hotel.updateDisplay();
+    </script>
+</body>
+</html>
